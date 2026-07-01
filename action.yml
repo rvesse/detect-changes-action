@@ -1,0 +1,67 @@
+name: Detect Changes Action
+description: |
+  A simple action to help detect whether relevant changes have occurred and report an output that can been
+  used to customise subsequent jobs
+author: Rob Vesse
+branding:
+  icon: "git-pull-request"
+  color: "purple"
+inputs:
+  pattern:
+    required: true
+    description: |
+      Specifies a grep expression used to match the changed files, if any changed files match then changes 
+      are considered detected
+  flags:
+    required: false
+    description: |
+      Specifies any flags to pass to grep, for example you might use -F if you wanted to just use a file extension
+      in the `pattern` input
+  base:
+    required: false
+    default: main
+    description: |
+      Specifies the base branch that changes are detected relative to.
+  output-on-base:
+    required: false
+    default: "true"
+    description: |
+      Specifies what the output should be if this runs on the `base` branch.
+outputs:
+  changed:
+    value: ${{ steps.change-detection.outputs.changed }}
+    description: |
+      Value indicating whether changes have been detected based on the given configuration, `true` if changes detected,
+      `false` if no changes detected and `output-on-base` if run on the configured `base` branch.
+runs:
+  using: "composite"
+  steps:
+    - name: Compute Git Diff
+      if: ${{ github.ref_name != inputs.base }}
+      shell: bash
+      run: |
+        git fetch
+        git diff --name-only origin/${{ inputs.base }} -- > ${{ runner.temp }}/detected-changes.txt
+
+    - name: Detect whether any Relevant Changes
+      id: change-detection
+      shell: bash
+      run: |
+        if [ -f "${{ runner.temp }}/detected-changes.txt" ]; then
+          if grep ${{inputs.flags }} "${{ inputs.pattern }}" "${{ runner.temp }}/detected-changes.txt" >/dev/null 2>&1; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "::notice::Changes Detected for pattern ${{ inputs.flags }} ${{ inputs.pattern }} against base ${{ inputs.base }} for reference ${{ github.ref_name}}"
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "::warning::No Changes Detected for pattern ${{ inputs.flags }} ${{ inputs.pattern }} against base ${{ inputs.base }} for reference ${{ github.ref_name}}"
+          fi
+        else
+          echo "::notice::Build is on base branch ${{ inputs.base }} so producing configured default output ${{ inputs.output-on-base }}"
+          echo "changed=${{ inputs.output-on-base}}" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Remove Temporary File
+      if: ${{ always() }}
+      shell: bash
+      run: |
+        rm -f ${{ runner.temp }}/detected-changes.txt >/dev/null 2>&1
