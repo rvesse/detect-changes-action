@@ -27,7 +27,7 @@ jobs:
             pattern: .*
             flags: ""
             output-on-base: base
-            expected-output: ${{ github.ref_name == 'main' && 'base' || 'true' }}
+            expected-output: ${{ github.ref_name == 'main' && 'base' || 'false' }}
             change-file: ""
           - name: When change exists then change detected
             base: main
@@ -44,6 +44,14 @@ jobs:
             output-on-base: base
             require-non-base: true
             expected-output: false
+            change-file: test.txt
+          - name: Detect change with extended regex
+            base: main
+            pattern: .md|.txt
+            flags: -E
+            output-on-base: base
+            require-non-base: true
+            expected-output: true
             change-file: test.txt
     name: ${{ matrix.name }}
     steps:
