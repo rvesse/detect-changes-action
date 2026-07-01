@@ -32,8 +32,17 @@ jobs:
             pattern: .*
             flags: ""
             output-on-base: base
+            require-non-base: true
             expected-output: true
             change-file: test-file
+          - name: When irrelevant change exists then change not detected
+            base: main
+            pattern: .md
+            flags: -F
+            output-on-base: base
+            require-non-base: true
+            expected-output: false
+            change-file: test.txt
     name: ${{ matrix.name }}
     steps:
       - name: Checkout
@@ -51,6 +60,7 @@ jobs:
 
       - name: Run action
         id: change-detection
+        if: ${{ matrix.require-non-base != 'true' || github.ref_name != matrix.base }}
         uses: rvesse/detect-changes-action@v1
         with:
           base: ${{ matrix.base}}
@@ -59,7 +69,14 @@ jobs:
           output-on-base: ${{ matrix.output-on-base}}
 
       - name: Verify default output
+        if: ${{ matrix.require-non-base != 'true' || github.ref_name != matrix.base }}
         run: |
           if [ "${{ steps.change-detection.outputs.changed}}" != "${{ matrix.expected-output}}" ]; then
             echo "::error::Change Detection output not expected value ${{ matrix.expected-output }}, got ${{ steps.change-detection.outputs.changed }}"
+            exit 1
           fi
+
+      - name: Note when test skipped
+        if: ${{ matrix.require-non-base == 'true' && github.ref_name == matrix.base }}
+        run: |
+          echo "::notice::Test skipped as requires non-base branch for test but running on configured base branch"
