@@ -48,7 +48,7 @@ jobs:
         shell: bash
         # Here we use the output from this action to inject the -DskipTests flag if no Java changes were detected
         run:
-          mvn clean install ${{ steps.java-changes.outputs.changed == false && "-DskipTests" || "" }}
+          mvn clean install ${{ steps.java-changes.outputs.changed == false && '-DskipTests' || '' }}
 ```
 
 # Requirements
@@ -64,6 +64,7 @@ versus the given `base` branch.
 | `pattern`        | True      |         | Provides the `grep` pattern that is applied to the `git diff` output to determine if any changes are considered relevant . |
 | `flags`          | False     |         | Provides any flags to pass to `grep` to configure how it treats the `pattern` input. |
 | `output-on-base` | False     | `true`  | Provides the value to return in the `changed` output
+| `summary`        | False     | `true`  | The relevant changes detected will be added to the job summary if set to `true`. |
 
 ## The `base` branch/reference
 
@@ -92,6 +93,14 @@ cannot be any changes and the `git diff` and `grep` are skipped.
 Instead the action returns the value of the `output-on-base` input as the [`changed`](#outputs) output.  This allows
 workflows to distinguish between cases of actual change detection, versus cases where no change detection is possible.
 
+## The `summary` input
+
+The `summary` input controls whether this action will add a [job summary][JobSummary] when it runs, this defaults to
+`true` meaning it is enabled by default.  This can be disabled by setting to any other value.
+
+The summary is useful when you initially adopt the action to help debug what changed files were detected and help you
+refine your [`pattern`](#the-pattern-and-flags-inputs) appropriately for your workflow.
+
 # Outputs
 
 This action has a single `changed` output that may have one of three possible values:
@@ -101,3 +110,4 @@ This action has a single `changed` output that may have one of three possible va
 3. The value of the `output-on-base` input if the action was run on your configured `base` branch
 
 [PathFilters]: https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#running-your-workflow-only-when-a-push-affects-specific-files
+[JobSummary]: https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-commands#adding-a-job-summary
