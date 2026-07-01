@@ -24,7 +24,7 @@ jobs:
             change-file: ""
           - name: Comparison to main produces expected output
             base: main
-            pattern: .*
+            pattern: no-such-file
             flags: ""
             output-on-base: base
             expected-output: ${{ github.ref_name == 'main' && 'base' || 'false' }}
@@ -39,7 +39,7 @@ jobs:
             change-file: test-file
           - name: When irrelevant change exists then change not detected
             base: main
-            pattern: .md
+            pattern: .foo
             flags: -F
             output-on-base: base
             require-non-base: true
@@ -47,7 +47,7 @@ jobs:
             change-file: test.txt
           - name: Detect change with extended regex
             base: main
-            pattern: .md|.txt
+            pattern: .foo|.txt
             flags: -E
             output-on-base: base
             require-non-base: true
