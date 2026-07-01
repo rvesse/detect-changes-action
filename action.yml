@@ -58,7 +58,15 @@ runs:
             echo "::notice::Changes Detected for pattern ${{ inputs.flags }} ${{ inputs.pattern }} against base ${{ inputs.base }} for reference ${{ github.ref_name}}"
             if [ "${{ inputs.summary }}" == "true" ]; then
               echo "# Detected Changes" >> $GITHUB_STEP_SUMMARY
-              grep ${{inputs.flags}} "${{ inputs.pattern }}" "${{ runner.temp }}/detected-changes.txt" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo '`pattern`: `${{ inputs.pattern }}`' >> $GITHUB_STEP_SUMMARY
+              if [ -n "${{ inputs.flags }}" ]; then
+                echo '`flags`: `${{ inputs.flags }}`' >> $GITHUB_STEP_SUMMARY
+              fi
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "**Changed Files:**" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              grep ${{inputs.flags}} "${{ inputs.pattern }}" "${{ runner.temp }}/detected-changes.txt" | xargs echo "- " >> $GITHUB_STEP_SUMMARY
             fi
           else
             echo "changed=false" >> $GITHUB_OUTPUT
