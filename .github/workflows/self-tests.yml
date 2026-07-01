@@ -18,12 +18,30 @@ jobs:
             flags: ""
             output-on-base: test
             expected-output: test
+            change-file: ""
           - base: main
             pattern: .*
             flags: ""
             output-on-base: base
             expected-output: ${{ github.ref_name == 'main' && 'base' || 'true' }}
+            change-file: ""
+          - base: main
+            pattern: .*
+            flags: ""
+            output-on-base: base
+            expected-output: true
+            change-file: test-file
     steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Introduce fake change
+        if: ${{ matrix.change-file != '' }}
+        shell: bash
+        run: |
+          echo "test" >> ${{ matrix.change-file }}
+          git commit -m "Test" --author "Test <test@example.org>"
+
       - name: Run action
         id: change-detection
         uses: rvesse/detect-changes-action@v1
