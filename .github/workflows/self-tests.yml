@@ -1,9 +1,11 @@
 name: Self Tests
 
-# Run workflow for any push to a branch
+# Run workflow for any push to a branch/tag
 on:
   push:
     branches:
+      - '**'
+    tags:
       - '**'
 
 jobs:
