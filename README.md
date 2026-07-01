@@ -48,7 +48,7 @@ jobs:
         shell: bash
         # Here we use the output from this action to inject the -DskipTests flag if no Java changes were detected
         run:
-          mvn clean install ${{ steps.java-changes.outputs.changed == false && '-DskipTests' || '' }}
+          mvn clean install ${{ case(steps.java-changes.outputs.changed == 'false', '-DskipTests', '') }}
 ```
 
 # Requirements
