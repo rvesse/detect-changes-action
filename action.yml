@@ -41,7 +41,7 @@ runs:
       shell: bash
       run: |
         git fetch
-        git diff --name-only ${{ inputs.base }} -- > ${{ runner.temp }}/detected-changes.txt
+        git diff --name-only origin/${{ inputs.base }} -- > ${{ runner.temp }}/detected-changes.txt
 
     - name: Detect whether any Relevant Changes
       id: change-detection
