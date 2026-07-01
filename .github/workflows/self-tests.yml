@@ -1,0 +1,40 @@
+name: Self Tests
+
+# Run workflow for any push to a branch
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  matrix:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - base: ${{ github.ref_name}}
+            pattern: .*
+            flags: ""
+            output-on-base: test
+            expected-output: test
+          - base: main
+            pattern: .*
+            flags: ""
+            output-on-base: base
+            expected-output: ${{ github.ref_name == 'main' && 'base' || 'true' }}
+    steps:
+      - name: Run action
+        id: change-detection
+        uses: rvesse/detect-changes-action@v1
+        with:
+          base: ${{ matrix.base}}
+          pattern: ${{ matrix.pattern}}
+          flags: ${{ matrix.flags }}
+          output-on-base: ${{ matrix.output-on-base}}
+
+      - name: Verify default output
+        run: |
+          if [ "${{ steps.change-detection.outputs.changed}}" != "${{ matrix.expected-output}}" ]; then
+            echo "::error::Change Detection output not expected value ${{ matrix.expected-output }}, got ${{ steps.change-detection.outputs.changed }}"
+          fi
