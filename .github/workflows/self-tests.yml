@@ -13,24 +13,28 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - base: ${{ github.ref_name}}
+          - name: Base Branch match returns configured output
+            base: ${{ github.ref_name}}
             pattern: .*
             flags: ""
             output-on-base: test
             expected-output: test
             change-file: ""
-          - base: main
+          - name: Comparison to main produces expected output
+            base: main
             pattern: .*
             flags: ""
             output-on-base: base
             expected-output: ${{ github.ref_name == 'main' && 'base' || 'true' }}
             change-file: ""
-          - base: main
+          - name: When change exists then change detected
+            base: main
             pattern: .*
             flags: ""
             output-on-base: base
             expected-output: true
             change-file: test-file
+    name: ${{ matrix.name }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -40,7 +44,10 @@ jobs:
         shell: bash
         run: |
           echo "test" >> ${{ matrix.change-file }}
-          git commit -m "Test" --author "Test <test@example.org>"
+          git add ${{ matrix.change-file }}
+          git config --global user.email "test@example.org"
+          git config --global user.name "Test[bot]"
+          git commit -m "Introducing changed file"
 
       - name: Run action
         id: change-detection
