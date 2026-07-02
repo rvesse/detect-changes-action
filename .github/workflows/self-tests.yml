@@ -22,6 +22,9 @@ jobs:
             output-on-base: test
             expected-output: test
             change-file: ""
+            summary: true
+            notices: true
+
           - name: Comparison to main produces expected output
             base: main
             pattern: no-such-file
@@ -29,6 +32,9 @@ jobs:
             output-on-base: base
             expected-output: ${{ github.ref_name == 'main' && 'base' || 'false' }}
             change-file: ""
+            summary: true
+            notices: true
+
           - name: When change exists then change detected
             base: main
             pattern: .*
@@ -37,6 +43,9 @@ jobs:
             require-non-base: true
             expected-output: true
             change-file: test-file
+            summary: true
+            notices: true
+
           - name: When irrelevant change exists then change not detected
             base: main
             pattern: .foo
@@ -45,6 +54,9 @@ jobs:
             require-non-base: true
             expected-output: false
             change-file: test.txt
+            summary: true
+            notices: true
+
           - name: Detect change with extended regex
             base: main
             pattern: .foo|.txt
@@ -53,6 +65,9 @@ jobs:
             require-non-base: true
             expected-output: true
             change-file: test.txt
+            summary: true
+            notices: true
+
           - name: Detect Changes but disable Summary and Notices
             base: main
             pattern: .foo|.txt
@@ -63,6 +78,7 @@ jobs:
             change-file: test.txt
             summary: false
             notices: false
+            
     name: ${{ matrix.name }}
     steps:
       - name: Checkout
@@ -87,8 +103,8 @@ jobs:
           pattern: ${{ matrix.pattern}}
           flags: ${{ matrix.flags }}
           output-on-base: ${{ matrix.output-on-base}}
-          summary: ${{ case(matrix.summary != '', matrix.summary, 'true') }}
-          notices: ${{ case(matrix.notices != '', matrix.notices, 'true') }}
+          summary: ${{ matrix.summary }}
+          notices: ${{ matrix.notices }}
 
       - name: Verify default output
         if: ${{ matrix.require-non-base != true || github.ref_name != matrix.base }}
