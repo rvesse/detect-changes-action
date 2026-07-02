@@ -56,6 +56,8 @@ jobs:
 **IMPORTANT:** This action assumes that your workflow has checked out the reference that you want to detect changes in
 versus the given `base` branch.
 
+For most workflows this means using the [`actions/checkout`][CheckoutAction] action.
+
 # Inputs
 
 | Input            | Required? | Default | Purpose |
@@ -63,7 +65,7 @@ versus the given `base` branch.
 | `base`           | False     | `main`  | Indicates the base branch/reference against which changes should be detected. |
 | `pattern`        | True      |         | Provides the `grep` pattern that is applied to the `git diff` output to determine if any changes are considered relevant . |
 | `flags`          | False     |         | Provides any flags to pass to `grep` to configure how it treats the `pattern` input. |
-| `output-on-base` | False     | `true`  | Provides the value to return in the `changed` output
+| `output-on-base` | False     | `true`  | Provides the value to return in the `changed` output if run on the configured `base` branch. |
 | `summary`        | False     | `true`  | The relevant changes detected will be added to the job summary if set to `true`. |
 | `notices`        | False     | `true`  | GitHub Actions notices and warnings will be generated if set to `true`. |
 
@@ -105,7 +107,7 @@ An example summary looks like the following:
 
 The summary is useful when you initially adopt the action to help debug what changed files were detected and help you
 refine your [`pattern`](#the-pattern-and-flags-inputs) appropriately for your workflow.  However once you have
-established that your pattern is correct configured it may be preferable to disable this, especially if your workflow
+established that your pattern is correctly configured it may be preferable to disable this, especially if your workflow
 calls this action multiple times.
 
 ## The `notices` input
@@ -128,5 +130,6 @@ This action has a single `changed` output that may have one of three possible va
 2. `false` if no changed files matching your `pattern` input were detected relative to the `base` branch
 3. The value of the `output-on-base` input if the action was run on your configured `base` branch
 
+[CheckoutAction]: https://github.com/actions/checkout
 [PathFilters]: https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#running-your-workflow-only-when-a-push-affects-specific-files
 [JobSummary]: https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-commands#adding-a-job-summary
