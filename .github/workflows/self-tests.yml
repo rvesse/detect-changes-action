@@ -53,6 +53,16 @@ jobs:
             require-non-base: true
             expected-output: true
             change-file: test.txt
+          - name: Detect Changes but disable Summary and Notices
+            base: main
+            pattern: .foo|.txt
+            flags: -E
+            output-on-base: base
+            require-non-base: true
+            expected-output: true
+            change-file: test.txt
+            summary: false
+            notices: false
     name: ${{ matrix.name }}
     steps:
       - name: Checkout
@@ -77,6 +87,8 @@ jobs:
           pattern: ${{ matrix.pattern}}
           flags: ${{ matrix.flags }}
           output-on-base: ${{ matrix.output-on-base}}
+          summary: ${{ case(matrix.summary != '', matrix.summary, 'true') }}
+          notices: ${{ case(matrix.notices != '', matrix.notices, 'true') }}
 
       - name: Verify default output
         if: ${{ matrix.require-non-base != true || github.ref_name != matrix.base }}

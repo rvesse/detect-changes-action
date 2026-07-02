@@ -31,7 +31,12 @@ inputs:
     required: false
     default: "true"
     description: |
-      Specifies whether the detected changes are also included in the Job Summary
+      Specifies whether the list of files with detected changes are output in the Job Summary, enabled by default.
+  notices:
+    required: false
+    default: "true"
+    description: |
+      Specifies whether the action issues GitHub Actions warnings and notices, enabled by default.
 outputs:
   changed:
     value: ${{ steps.change-detection.outputs.changed }}
@@ -51,12 +56,16 @@ runs:
     - name: Detect whether any Relevant Changes
       id: change-detection
       shell: bash
+      env:
+        NOTICE: ${{ case(inputs.notices == 'true', '::notice::', 'INFO ') }}
+        WARNING: ${{ case(inputs.notices == 'true', '::warning::', 'WARN ') }}
+        SUMMARY: ${{ case(inputs.summary == 'true', 'true', '' ) }}
       run: |
         if [ -f "${{ runner.temp }}/detected-changes.txt" ]; then
           if grep ${{inputs.flags }} "${{ inputs.pattern }}" "${{ runner.temp }}/detected-changes.txt" >/dev/null 2>&1; then
             echo "changed=true" >> $GITHUB_OUTPUT
-            echo "::notice::Changes Detected for pattern ${{ inputs.flags }} ${{ inputs.pattern }} against base ${{ inputs.base }} for reference ${{ github.ref_name}}"
-            if [ "${{ inputs.summary }}" == "true" ]; then
+            echo "${NOTICE}Changes Detected for pattern ${{ inputs.flags }} ${{ inputs.pattern }} against base ${{ inputs.base }} for reference ${{ github.ref_name}}"
+            if [ -n "${SUMMARY}" ]; then
               echo "# Detected Changes" >> $GITHUB_STEP_SUMMARY
               echo "" >> $GITHUB_STEP_SUMMARY
               echo '`pattern`: `${{ inputs.pattern }}`' >> $GITHUB_STEP_SUMMARY
@@ -70,10 +79,10 @@ runs:
             fi
           else
             echo "changed=false" >> $GITHUB_OUTPUT
-            echo "::warning::No Changes Detected for pattern ${{ inputs.flags }} ${{ inputs.pattern }} against base ${{ inputs.base }} for reference ${{ github.ref_name}}"
+            echo "${WARNING}No Changes Detected for pattern ${{ inputs.flags }} ${{ inputs.pattern }} against base ${{ inputs.base }} for reference ${{ github.ref_name}}"
           fi
         else
-          echo "::notice::Build is on base branch ${{ inputs.base }} so producing configured default output ${{ inputs.output-on-base }}"
+          echo "${NOTICE}Build is on base branch ${{ inputs.base }} so producing configured default output ${{ inputs.output-on-base }}"
           echo "changed=${{ inputs.output-on-base}}" >> $GITHUB_OUTPUT
         fi
 
