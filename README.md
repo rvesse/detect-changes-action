@@ -65,6 +65,7 @@ versus the given `base` branch.
 | `flags`          | False     |         | Provides any flags to pass to `grep` to configure how it treats the `pattern` input. |
 | `output-on-base` | False     | `true`  | Provides the value to return in the `changed` output
 | `summary`        | False     | `true`  | The relevant changes detected will be added to the job summary if set to `true`. |
+| `notices`        | False     | `true`  | GitHub Actions notices and warnings will be generated if set to `true`. |
 
 ## The `base` branch/reference
 
@@ -98,8 +99,26 @@ workflows to distinguish between cases of actual change detection, versus cases 
 The `summary` input controls whether this action will add a [job summary][JobSummary] when it runs, this defaults to
 `true` meaning it is enabled by default.  This can be disabled by setting to any other value.
 
+An example summary looks like the following:
+
+![Example Job Summary](example-job-summary.png)
+
 The summary is useful when you initially adopt the action to help debug what changed files were detected and help you
-refine your [`pattern`](#the-pattern-and-flags-inputs) appropriately for your workflow.
+refine your [`pattern`](#the-pattern-and-flags-inputs) appropriately for your workflow.  However once you have
+established that your pattern is correct configured it may be preferable to disable this, especially if your workflow
+calls this action multiple times.
+
+## The `notices` input
+
+The `notices` input controls whether this action will produce GitHub Actions notices and warnings that will be added to
+your build summary, this defaults to `true` meaning it is enabled by default.  If you prefer for these not to be issued
+then disable it by setting it to any other value.
+
+Example notices are like so:
+
+![Example Job Notices](example-notices.png)
+
+If your workflow calls this action many times this may get quite messy and it may be preferable to disable these.
 
 # Outputs
 
